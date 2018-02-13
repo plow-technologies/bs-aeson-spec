@@ -17,6 +17,7 @@ import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Monoid ((<>))
 import Data.Proxy
+import Data.Ratio
 import System.Directory (doesFileExist)
 import GHC.Generics
 import Servant
@@ -78,7 +79,16 @@ instance Arbitrary Shape where
       , Rectangle <$>  arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
       ]
 
+instance ToADTArbitrary (Ratio Int) where
+  toADTArbitrarySingleton Proxy =
+    ADTArbitrarySingleton "Database.Ratio" "Ratio"
+      <$> (ConstructorArbitraryPair "Ratio" <$> arbitrary)
 
+  toADTArbitrary Proxy =
+    ADTArbitrary "Database.Persist" "Ratio"
+      <$> sequence
+        [ ConstructorArbitraryPair "Ratio" <$> arbitrary
+        ]
 
 type TestAPI = "person"  :> ReqBody '[JSON] Person  :> Post '[JSON] Person
           :<|> "company" :> ReqBody '[JSON] Company :> Post '[JSON] Company
@@ -86,7 +96,8 @@ type TestAPI = "person"  :> ReqBody '[JSON] Person  :> Post '[JSON] Person
           :<|> "people"    :> ReqBody '[JSON] [Person]  :> Post '[JSON] [Person]
           :<|> "companies" :> ReqBody '[JSON] [Company] :> Post '[JSON] [Company]
           :<|> "shapes" :> ReqBody '[JSON] [Shape] :> Post '[JSON] [Shape]
-
+          :<|> "rational" :> ReqBody '[JSON] [Ratio Int] :> Post '[JSON] [Ratio Int]
+          
 testAPI :: Proxy TestAPI
 testAPI = Proxy
 
@@ -109,6 +120,9 @@ server = (\person -> do
     :<|> (\shapes -> do
              liftIO $ print "shapes route called"
              return shapes)
+    :<|> (\rationals -> do
+             liftIO $ print "rational route called"
+             return rationals)
 
 app :: Application
 app = serve testAPI server
@@ -118,4 +132,5 @@ main = do
   mkGoldenFileForType 100 (Proxy :: Proxy Person) "../__tests__/golden" 
   mkGoldenFileForType 100 (Proxy :: Proxy Company) "../__tests__/golden"
   mkGoldenFileForType 100 (Proxy :: Proxy Shape) "../__tests__/golden"
+  mkGoldenFileForType 100 (Proxy :: Proxy (Ratio Int)) "../__tests__/golden"
   run 8081 app

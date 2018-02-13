@@ -165,3 +165,28 @@ let sampleGoldenAndServerSpec decode encode name_of_type url json_dir =
 
 let decodeIntWithResult json =
   Aeson.Decode.wrapResult Aeson.Decode.int json
+
+  
+let _ =
+  let w = ref 0 in
+  w := 1;
+  Js.log w;
+  let handle = Js.Global.setInterval (fun () -> Js.log "hello") 100 in
+  while true do
+    if 1 == 0 then Js.Global.clearInterval handle else ();
+  done
+(*  
+  let d = ref false in
+  let w = ref 0 in
+  let interval = ref in
+  interval := Js.Undefined.return @@ Js.Global.setInterval (fun () -> Js.log "set interval"; w := (!w) + 1;) 500;
+
+  while not !d do
+    if !w > 10 then begin
+      Js.log "clearInterval";
+      Js.Global.clearInterval interval;
+      d := true;
+    end
+  done
+
+ *)

@@ -133,7 +133,14 @@ let () =
   let person3 : Test.person = {name = "Jordi" ; age = 23} in
   let company : Test.company = {companyName = "Acme" ; employees = [person ; person2 ; person3]  } in
 
+  Js.log("sleeping");
+
+  (*  Js.Promise.make(fun ~resolve ~reject:_ -> Js.Global.setTimeout (fun () -> resolve [@bs]; ();) 10; (); )|> Js.log("it finished"); *)
+  Js.log("awake");
+
   AesonSpec.goldenSpec Test.decodePerson Test.encodePerson "person" "__tests__/golden/Person.json";
+(*  
+map [|1;2;3|] (fun [@bs] x -> x + 1) (2)
 
   AesonSpec.serverSpec Test.decodePerson Test.encodePerson "person" "http://localhost:8081/person" person;
 
@@ -144,6 +151,8 @@ let () =
   AesonSpec.sampleGoldenAndServerSpec Test.decodeCompany Test.encodeCompany "company" "http://localhost:8081/companies" "__tests__/golden/Company";
 
   AesonSpec.sampleGoldenAndServerSpec Test.decodeShape Test.encodeShape "shape" "http://localhost:8081/shapes" "__tests__/golden/Shape";
+
+  AesonSpec.sampleGoldenAndServerSpec (Aeson.Decode.wrapResult Aeson.Decode.rational) Aeson.Encode.rational "rational" "http://localhost:8081/rational" "__tests__/golden/Ratio";
   
   describe "isJsonFile" (fun () ->         
     test "" (fun () ->
@@ -154,3 +163,4 @@ let () =
       expect (AesonSpec.isJsonFile filename) |> toEqual true;
     )
   )
+ *)

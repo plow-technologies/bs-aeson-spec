@@ -1,0 +1,65 @@
+Arguments: 
+  /usr/local/bin/node /usr/share/yarn/bin/yarn.js
+
+PATH: 
+  /home/james/bin:/home/james/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+Yarn version: 
+  1.3.2
+
+Node version: 
+  6.7.0
+
+Platform: 
+  linux x64
+
+npm manifest: 
+  {
+    "name": "bs-aeson-spec",
+    "version": "1.1.0",
+    "description": "Test bs-aeson against against an auto-generated servant server from ocaml-export",
+    "main": "index.js",
+    "scripts": {
+      "build": "bsb -make-world",
+      "start": "bsb -make-world -w",
+      "test": "npm run build && jest",
+      "watch:bsb": "bsb -make-world -w",
+      "watch:jest": "jest --watchAll",
+      "watch:screen": "screen -c .screenrc"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/plow-technologies/bs-aeson-spec.git"
+    },
+    "keywords": [
+      "bucklescript",
+      "json",
+      "aeson"
+    ],
+    "author": "mchaver",
+    "license": "BSD-3-Clause",
+    "bugs": {
+      "url": "https://github.com/plow-technologies/bs-aeson-spec/issues"
+    },
+    "homepage": "https://github.com/plow-technologies/bs-aeson-spec#readme",
+    "dependencies": {
+      "bs-aeson": "^1.1.0",
+      "bs-node-fetch": "^0.1.2",
+      "@glennsl/bs-jest": "^0.3.2"
+      "bs-platform": "^2.1.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  SyntaxError: /home/james/work/bs-aeson-spec/package.json: Unexpected string in JSON at position 924
+      at Object.parse (native)
+      at /usr/share/yarn/lib/cli.js:770:59
+      at next (native)
+      at step (/usr/share/yarn/lib/cli.js:92:30)
+      at /usr/share/yarn/lib/cli.js:103:13
