@@ -11,19 +11,19 @@ module Test = struct
     | Triangle of int * int * int
     | Rectangle of int * int * int * int
 
-  let encodePerson (p : person) :Js_json.t =
+  let encodePerson (p : person) :Aeson.Json.t =
     Aeson.Encode.object_
       [ ( "name", Aeson.Encode.string p.name)
       ; ( "age", Aeson.Encode.int p.age)
       ]
 
-  let brokenEncodePerson (p : person) :Js_json.t =
+  let brokenEncodePerson (p : person) :Aeson.Json.t =
     Aeson.Encode.object_
       [ ( "Name", Aeson.Encode.string p.name)
       ; ( "Age", Aeson.Encode.int p.age)
       ]
 
-  let decodePerson (json : Js_json.t) :(person, string) Belt.Result.t =
+  let decodePerson (json : Aeson.Json.t) :(person, string) Belt.Result.t =
     match Aeson.Decode.
           { name = field "name" string json
           ; age = field "age" int json
@@ -32,13 +32,13 @@ module Test = struct
     | v -> Belt.Result.Ok v
     | exception Aeson.Decode.DecodeError message -> Belt.Result.Error ("decodePerson: " ^ message)
 
-  let encodeCompany (p : company) :Js_json.t =
+  let encodeCompany (p : company) :Aeson.Json.t =
     Aeson.Encode.object_
       [ ( "companyName", Aeson.Encode.string p.companyName)
       ; ( "employees", Aeson.Encode.list encodePerson p.employees)
       ]
 
-  let decodeCompany (json : Js_json.t) :(company, string) Belt.Result.t =
+  let decodeCompany (json : Aeson.Json.t) :(company, string) Belt.Result.t =
     match Aeson.Decode.
           { companyName = field "companyName" string json
           ; employees = field "employees" (list (fun a -> unwrapResult (decodePerson a))) json
@@ -47,7 +47,7 @@ module Test = struct
     | v -> Belt.Result.Ok v
     | exception Aeson.Decode.DecodeError message -> Belt.Result.Error ("decodePerson: " ^ message)
 
-  let encodeShape (x : shape) :Js_json.t =
+  let encodeShape (x : shape) :Aeson.Json.t =
     match x with
     | Square (y0,y1) ->
        Aeson.Encode.object_
@@ -65,10 +65,10 @@ module Test = struct
          ; ( "contents" , Aeson.Encode.array [| Aeson.Encode.int y0 ; Aeson.Encode.int y1 ; Aeson.Encode.int y2 ; Aeson.Encode.int y3|])
          ]
 
-  let decodeShape (json : Js_json.t) :(shape, string) Belt.Result.t =
+  let decodeShape (json : Aeson.Json.t) :(shape, string) Belt.Result.t =
     match Aeson.Decode.(field "tag" string json) with
     | "Square" ->
-       (match Aeson.Decode.(field "contents" Js.Json.decodeArray json) with
+       (match Aeson.Decode.(field "contents" Aeson.Json.decodeArray json) with
         | Some v ->
            (match Aeson.Decode.int v.(0) with
             | v0 ->
@@ -82,7 +82,7 @@ module Test = struct
         | None -> Belt.Result.Error ("Square expected an array.")
        )
     | "Triangle" ->
-       (match Aeson.Decode.(field "contents" Js.Json.decodeArray json) with
+       (match Aeson.Decode.(field "contents" Aeson.Json.decodeArray json) with
         | Some v ->
            (match Aeson.Decode.int v.(0) with
             | v0 ->
@@ -100,7 +100,7 @@ module Test = struct
         | None -> Belt.Result.Error ("Triangle expected an array.")
        )
     | "Rectangle" ->
-       (match Aeson.Decode.(field "contents" Js.Json.decodeArray json) with
+       (match Aeson.Decode.(field "contents" Aeson.Json.decodeArray json) with
         | Some v ->
            (match Aeson.Decode.int v.(0) with
             | v0 ->

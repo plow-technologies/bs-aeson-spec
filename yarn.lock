@@ -400,9 +400,11 @@ browser-resolve@^1.11.2:
   dependencies:
     resolve "1.1.7"
 
-bs-aeson@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/bs-aeson/-/bs-aeson-3.0.0.tgz#7478a3797e43b583fcdc1fe9f6cd7264e27faa49"
+bs-aeson@plow-technologies/bs-aeson#dd387815da3e2f80a9e7cd4d51137e9aa028edc5:
+  version "4.0.0"
+  resolved "https://codeload.github.com/plow-technologies/bs-aeson/tar.gz/dd387815da3e2f80a9e7cd4d51137e9aa028edc5"
+  dependencies:
+    bs-zarith "^1.0.0"
 
 bs-node-fetch@^0.1.2:
   version "0.1.2"
@@ -413,6 +415,10 @@ bs-node-fetch@^0.1.2:
 bs-platform@^3.1.5:
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-3.1.5.tgz#fb34ee4702bc9163848d5537096c4f31ebaeed40"
+
+bs-zarith@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/bs-zarith/-/bs-zarith-1.0.0.tgz#0f2f23f3351941c4198f2190b9118a1791bec7da"
 
 bser@^2.0.0:
   version "2.0.0"

@@ -9,19 +9,19 @@ type 'a sample =
   }
   
 let decodeSampleUnsafe decode json =  
-  { seed = Aeson.Decode.field "seed" Aeson.Decode.float json
-  ; samples = Aeson.Decode.field "samples" (Aeson.Decode.list (fun a -> Aeson.Decode.unwrapResult (decode a))) json
+  { seed = Aeson.JsJson.Decode.field "seed" Aeson.JsJson.Decode.float json
+  ; samples = Aeson.JsJson.Decode.field "samples" (Aeson.JsJson.Decode.list (fun a -> Aeson.JsJson.Decode.unwrapResult (decode a))) json
   }
 
 let decodeSample decode json =
   match decodeSampleUnsafe decode json with
   | v -> Belt.Result.Ok v
-  | exception Aeson.Decode.DecodeError message -> Belt.Result.Error ("decodeSample: " ^ message)
+  | exception Aeson.JsJson.Decode.DecodeError message -> Belt.Result.Error ("decodeSample: " ^ message)
 
 let encodeSample encode sample =
-  Aeson.Encode.object_
-    [ ( "seed",  Aeson.Encode.float sample.seed )
-    ; ( "samples", Aeson.Encode.list encode sample.samples )
+  Aeson.JsJson.Encode.object_
+    [ ( "seed",  Aeson.JsJson.Encode.float sample.seed )
+    ; ( "samples", Aeson.JsJson.Encode.list encode sample.samples )
     ]
 
 (* internal functions *)
@@ -52,17 +52,17 @@ let valueRoundtripSpec decode encode value =
 (* file tests *)
 
 let goldenSpec decode encode name_of_type json_file = (
-  describe ("AesonSpec.goldenSpec: " ^ name_of_type ^ " from file '" ^ json_file ^ "'") (fun () ->
-    let json = Aeson.Json.parseExn (Node.Fs.readFileAsUtf8Sync json_file) in
-    test ("decode then encode: " ^ (Aeson.Json.stringify json)) (fun () ->
+  describe ("Aeson.JsJsonSpec.goldenSpec: " ^ name_of_type ^ " from file '" ^ json_file ^ "'") (fun () ->
+    let json = Js.Json.parseExn (Node.Fs.readFileAsUtf8Sync json_file) in
+    test ("decode then encode: " ^ (Js.Json.stringify json)) (fun () ->
       jsonRoundtripSpec decode encode json
     )
   )
 )
                                                     
 let sampleGoldenSpec decode encode name_of_type json_file = (
-  describe ("AesonSpec.sampleGoldenSpec: " ^ name_of_type ^ " from file '" ^ json_file ^ "'") (fun () ->
-    let json = Aeson.Json.parseExn (Node.Fs.readFileAsUtf8Sync json_file) in
+  describe ("Aeson.JsJsonSpec.sampleGoldenSpec: " ^ name_of_type ^ " from file '" ^ json_file ^ "'") (fun () ->
+    let json = Js.Json.parseExn (Node.Fs.readFileAsUtf8Sync json_file) in
     test "decode then encode json_file" (fun () ->
       sampleJsonRoundtripSpec decode encode json
     )
@@ -72,8 +72,8 @@ let sampleGoldenSpec decode encode name_of_type json_file = (
 (* server tests *)
 
 let serverSpec decode encode name_of_type url value = (
-  let headers = Bs_node_fetch.HeadersInit.make (toJsObject (Js_dict.fromList [("Content-Type", Aeson.Json.string "application/json")])) in
-  let encodedString = Aeson.Json.stringify (encode value) in
+  let headers = Bs_node_fetch.HeadersInit.make (toJsObject (Js_dict.fromList [("Content-Type", Js_json.string "application/json")])) in
+  let encodedString = Js.Json.stringify (encode value) in
   let reqInit = 
     Bs_node_fetch.RequestInit.make
       ~method_:Bs_node_fetch.Post
@@ -82,12 +82,12 @@ let serverSpec decode encode name_of_type url value = (
       ~headers:headers
       () in
   
-  describe ("AesonSpec.serverSpec: " ^ name_of_type) (fun () ->
+  describe ("Aeson.JsJsonSpec.serverSpec: " ^ name_of_type) (fun () ->
     testPromise ("encode, POST to server, receieve from server, decode: " ^ encodedString) (fun () ->
       Js.Promise.(
         Bs_node_fetch.fetchWithInit url reqInit
           |> then_ (fun response -> (Bs_node_fetch.Response.text response)
-          |> then_ (fun text -> resolve (expect (Aeson.Decode.unwrapResult (decode (Aeson.Json.parseExn text))) |> toEqual value))
+          |> then_ (fun text -> resolve (expect (Aeson.JsJson.Decode.unwrapResult (decode (Js.Json.parseExn text))) |> toEqual value))
         )
       )
     )
@@ -95,8 +95,8 @@ let serverSpec decode encode name_of_type url value = (
 )
 
 let sampleServerSpec decode encode name_of_type url values = (
-  let headers = Bs_node_fetch.HeadersInit.make (toJsObject (Js_dict.fromList [("Content-Type", Aeson.Json.string "application/json")])) in
-  let encodedString = Aeson.Json.stringify (Aeson.Encode.list encode values) in
+  let headers = Bs_node_fetch.HeadersInit.make (toJsObject (Js_dict.fromList [("Content-Type", Js_json.string "application/json")])) in
+  let encodedString = Js.Json.stringify (Aeson.JsJson.Encode.list encode values) in
   let reqInit = 
     Bs_node_fetch.RequestInit.make
       ~method_:Bs_node_fetch.Post
@@ -105,12 +105,12 @@ let sampleServerSpec decode encode name_of_type url values = (
       ~headers:headers
       () in
   
-  describe ("AesonSpec.sampleServerSpec: " ^ name_of_type) (fun () ->
+  describe ("Aeson.JsJsonSpec.sampleServerSpec: " ^ name_of_type) (fun () ->
     testPromise "encode json_file, POST encoded to server, receieve response from server, decode response" (fun () ->
       Js.Promise.(
         Bs_node_fetch.fetchWithInit url reqInit
           |> then_ (fun response -> (Bs_node_fetch.Response.text response)
-          |> then_ (fun text -> resolve (expect ((Aeson.Decode.list (fun a -> Aeson.Decode.unwrapResult (decode a)) (Aeson.Json.parseExn text))) |> toEqual values))
+          |> then_ (fun text -> resolve (expect ((Aeson.JsJson.Decode.list (fun a -> Aeson.JsJson.Decode.unwrapResult (decode a)) (Js.Json.parseExn text))) |> toEqual values))
         )
       )
     )
@@ -127,17 +127,17 @@ let isJsonFile fileName =
 (* golden file and server tests *)
                                                            
 let sampleGoldenAndServerFileSpec decode encode name_of_type url json_file =
-  let json = Aeson.Json.parseExn (Node.Fs.readFileAsUtf8Sync json_file) in
+  let json = Js.Json.parseExn (Node.Fs.readFileAsUtf8Sync json_file) in
   match (decodeSample decode json) with 
   | Belt.Result.Ok sample -> (
-    describe ("AesonSpec.sampleGoldenAndServerSpec: " ^ name_of_type ^ " from file '" ^ json_file ^ "'") (fun () ->
+    describe ("Aeson.JsJsonSpec.sampleGoldenAndServerSpec: " ^ name_of_type ^ " from file '" ^ json_file ^ "'") (fun () ->
                
       test "decode then encode json_file" (fun () ->
         expect (encodeSample encode sample) |> toEqual json
       );
 
-      let headers = Bs_node_fetch.HeadersInit.make (toJsObject (Js_dict.fromList [("Content-Type", Aeson.Json.string "application/json")])) in
-      let encodedString = Aeson.Json.stringify (Aeson.Encode.list encode sample.samples) in
+      let headers = Bs_node_fetch.HeadersInit.make (toJsObject (Js_dict.fromList [("Content-Type", Js_json.string "application/json")])) in
+      let encodedString = Js.Json.stringify (Aeson.JsJson.Encode.list encode sample.samples) in
       let reqInit = 
         Bs_node_fetch.RequestInit.make
           ~method_:Bs_node_fetch.Post
@@ -150,7 +150,7 @@ let sampleGoldenAndServerFileSpec decode encode name_of_type url json_file =
         Js.Promise.(
           Bs_node_fetch.fetchWithInit url reqInit
             |> then_ (fun response -> (Bs_node_fetch.Response.text response)
-            |> then_ (fun text -> resolve (expect ((Aeson.Decode.list (fun a -> Aeson.Decode.unwrapResult (decode a)) (Aeson.Json.parseExn text))) |> toEqual sample.samples))
+            |> then_ (fun text -> resolve (expect ((Aeson.JsJson.Decode.list (fun a -> Aeson.JsJson.Decode.unwrapResult (decode a)) (Js.Json.parseExn text))) |> toEqual sample.samples))
           )
         )
       )
@@ -169,4 +169,4 @@ let sampleGoldenAndServerSpec decode encode name_of_type url json_dir =
   Array.iter (fun json_file -> sampleGoldenAndServerFileSpec decode encode name_of_type url (json_dir ^ "/" ^ json_file);) filesInDir
 
 let decodeIntWithResult json =
-  Aeson.Decode.wrapResult Aeson.Decode.int json
+  Aeson.JsJson.Decode.wrapResult Aeson.JsJson.Decode.int json
