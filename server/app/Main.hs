@@ -93,6 +93,7 @@ testAPI = Proxy
 server :: Server TestAPI
 server = (\person -> do
              liftIO $ print "person route called"
+             liftIO $ print $ encode person
              return person)
     :<|> (\company -> do
              liftIO $ print "company route called"
