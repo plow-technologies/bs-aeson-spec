@@ -26,7 +26,7 @@
   "homepage": "https://github.com/plow-technologies/bs-aeson-spec#readme",
   "dependencies": {
     "bs-aeson": "^3.0.0",
-    "bs-node-fetch": "^0.1.2",
+    "bs-node-fetch": "dysinger/bs-node-fetch",
     "@glennsl/bs-jest": "^0.4.3"
   },
   "devDependencies": {
