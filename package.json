@@ -27,7 +27,7 @@
   "dependencies": {
     "bs-aeson": "^3.0.0",
     "bs-node-fetch": "^0.1.2",
-    "@glennsl/bs-jest": "^0.4.2"
+    "@glennsl/bs-jest": "^0.4.3"
   },
   "devDependencies": {
     "bs-platform": "^4.0.5"
