@@ -128,8 +128,10 @@ let isJsonFile fileName =
                                                            
 let sampleGoldenAndServerFileSpec decode encode name_of_type url json_file =
   let json = Aeson.Json.parseExn (Node.Fs.readFileAsUtf8Sync json_file) in
+  Js.log(json);
   match (decodeSample decode json) with 
   | Belt.Result.Ok sample -> (
+    Js.log("it's ok");
     describe ("AesonSpec.sampleGoldenAndServerSpec: " ^ name_of_type ^ " from file '" ^ json_file ^ "'") (fun () ->
                
       test "decode then encode json_file" (fun () ->
@@ -150,7 +152,7 @@ let sampleGoldenAndServerFileSpec decode encode name_of_type url json_file =
         Js.Promise.(
           Bs_node_fetch.fetchWithInit url reqInit
             |> then_ (fun response -> (Bs_node_fetch.Response.text response)
-            |> then_ (fun text -> resolve (expect ((Aeson.Decode.list (fun a -> Aeson.Decode.unwrapResult (decode a)) (Aeson.Json.parseExn text))) |> toEqual sample.samples))
+            |> then_ (fun text -> Js.log(text); resolve (expect ((Aeson.Decode.list (fun a -> Aeson.Decode.unwrapResult (decode a)) (Aeson.Json.parseExn text))) |> toEqual sample.samples))
           )
         )
       )
@@ -166,6 +168,7 @@ let goldenDirSpec decode encode name_of_type json_dir =
 let sampleGoldenAndServerSpec decode encode name_of_type url json_dir =
   let filesInDir = (Js.Array.filter isJsonFile (Node.Fs.readdirSync json_dir)) in
   Js.log filesInDir;
+  Js.log "yoyoyo";
   Array.iter (fun json_file -> sampleGoldenAndServerFileSpec decode encode name_of_type url (json_dir ^ "/" ^ json_file);) filesInDir
 
 let decodeIntWithResult json =
